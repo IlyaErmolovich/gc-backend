@@ -17,20 +17,23 @@ exports.createReview = async (req, res) => {
   try {
     const userId = req.user.id;
     const gameId = req.params.gameId;
-    const { rating, reviewText } = req.body;
+    const { rating, raiting, reviewText } = req.body;
+    
+    // Используем raiting если он передан, иначе используем rating
+    const reviewRating = raiting || rating;
     
     // Проверка наличия обязательных полей
-    if (!rating || !reviewText) {
+    if (!reviewRating || !reviewText) {
       return res.status(400).json({ message: 'Необходимо указать рейтинг и текст отзыва' });
     }
 
     // Проверка корректности рейтинга
-    if (rating < 1 || rating > 5) {
+    if (reviewRating < 1 || reviewRating > 5) {
       return res.status(400).json({ message: 'Рейтинг должен быть от 1 до 5' });
     }
 
     // Создаем отзыв
-    const review = await Review.create(userId, gameId, rating, reviewText);
+    const review = await Review.create(userId, gameId, reviewRating, reviewText);
     
     res.status(201).json({
       message: 'Отзыв успешно создан',
@@ -46,20 +49,23 @@ exports.updateReview = async (req, res) => {
   try {
     const userId = req.user.id;
     const reviewId = req.params.id;
-    const { rating, reviewText } = req.body;
+    const { rating, raiting, reviewText } = req.body;
+    
+    // Используем raiting если он передан, иначе используем rating
+    const reviewRating = raiting || rating;
     
     // Проверка наличия обязательных полей
-    if (!rating || !reviewText) {
+    if (!reviewRating || !reviewText) {
       return res.status(400).json({ message: 'Необходимо указать рейтинг и текст отзыва' });
     }
 
     // Проверка корректности рейтинга
-    if (rating < 1 || rating > 5) {
+    if (reviewRating < 1 || reviewRating > 5) {
       return res.status(400).json({ message: 'Рейтинг должен быть от 1 до 5' });
     }
 
     // Обновляем отзыв
-    const review = await Review.update(reviewId, userId, rating, reviewText);
+    const review = await Review.update(reviewId, userId, reviewRating, reviewText);
     
     res.json({
       message: 'Отзыв успешно обновлен',

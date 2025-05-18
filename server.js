@@ -18,6 +18,9 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Путь для статических файлов (загруженные изображения)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Корневой маршрут для проверки API
 app.get('/', (req, res) => {
   res.json({ message: 'API работает' });
