@@ -40,25 +40,6 @@ const upload = multer({
   }
 });
 
-// Middleware для обработки загруженных файлов
-const processUploadedFile = (req, res, next) => {
-  // Если файл был загружен
-  if (req.file) {
-    // Создаем объект с данными об изображении
-    const imageData = {
-      data: req.file.buffer.toString('base64'),
-      contentType: req.file.mimetype,
-      filename: req.file.originalname
-    };
-    
-    // Заменяем объект файла на объект с данными изображения
-    req.fileData = imageData;
-    console.log('Файл успешно загружен в памяти');
-  }
-  
-  next();
-};
-
 // Middleware для загрузки аватара пользователя
 const uploadUserAvatar = upload.single('avatar');
 
