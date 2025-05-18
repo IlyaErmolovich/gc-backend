@@ -46,9 +46,12 @@ exports.createGame = async (req, res) => {
 
     let cover_image = null;
     
-    // Если загружена обложка
-    if (req.file) {
-      cover_image = `/uploads/${req.file.filename}`;
+    // Проверка на наличие файла
+    if (req.fileData) {
+      // Если fileData есть, сохраняем его
+      cover_image = JSON.stringify(req.fileData);
+    } else if (!cover_image) {
+      return res.status(400).json({ message: 'Обложка игры обязательна' });
     }
 
     // Преобразуем строки в массивы, если они пришли в виде строк
@@ -71,6 +74,7 @@ exports.createGame = async (req, res) => {
       game
     });
   } catch (error) {
+    console.error('Ошибка при создании игры:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -153,6 +157,41 @@ exports.getAllPlatforms = async (req, res) => {
     const platforms = await Game.getAllPlatforms();
     res.json(platforms);
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Получение обложки игры
+exports.getGameCover = async (req, res) => {
+  try {
+    const gameId = req.params.id;
+    const game = await Game.getById(gameId);
+    
+    if (!game || !game.cover_image) {
+      return res.status(404).json({ message: 'Обложка не найдена' });
+    }
+    
+    // Проверяем формат данных обложки
+    let coverData;
+    try {
+      // Пробуем распарсить как JSON (новый формат)
+      coverData = typeof game.cover_image === 'string' ? 
+        JSON.parse(game.cover_image) : 
+        game.cover_image;
+      
+      // Устанавливаем заголовки
+      res.set('Content-Type', coverData.contentType);
+      
+      // Конвертируем Base64 в буфер и отправляем
+      const imgBuffer = Buffer.from(coverData.data, 'base64');
+      res.send(imgBuffer);
+    } catch (err) {
+      // Если не получилось распарсить как JSON, это старый формат с путем к файлу
+      console.log('Используется старый формат обложки:', game.cover_image);
+      res.redirect(game.cover_image);
+    }
+  } catch (error) {
+    console.error('Ошибка получения обложки:', error);
     res.status(500).json({ message: error.message });
   }
 }; 
