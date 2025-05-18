@@ -47,10 +47,11 @@ exports.createGame = async (req, res) => {
     let cover_image = null;
     
     // Проверка на наличие файла
-    if (req.fileData) {
-      // Если fileData есть, сохраняем его
-      cover_image = JSON.stringify(req.fileData);
-    } else if (!cover_image) {
+    if (req.file) {
+      // Если файл загружен, сохраняем путь к нему
+      cover_image = `/uploads/${req.file.filename}`;
+      console.log('Файл загружен на сервер:', cover_image);
+    } else {
       return res.status(400).json({ message: 'Обложка игры обязательна' });
     }
 
@@ -171,24 +172,15 @@ exports.getGameCover = async (req, res) => {
       return res.status(404).json({ message: 'Обложка не найдена' });
     }
     
-    // Проверяем формат данных обложки
-    let coverData;
-    try {
-      // Пробуем распарсить как JSON (новый формат)
-      coverData = typeof game.cover_image === 'string' ? 
-        JSON.parse(game.cover_image) : 
-        game.cover_image;
-      
-      // Устанавливаем заголовки
-      res.set('Content-Type', coverData.contentType);
-      
-      // Конвертируем Base64 в буфер и отправляем
-      const imgBuffer = Buffer.from(coverData.data, 'base64');
-      res.send(imgBuffer);
-    } catch (err) {
-      // Если не получилось распарсить как JSON, это старый формат с путем к файлу
-      console.log('Используется старый формат обложки:', game.cover_image);
-      res.redirect(game.cover_image);
+    // Проверяем путь к файлу
+    const coverPath = path.join(__dirname, '..', game.cover_image);
+    
+    if (fs.existsSync(coverPath)) {
+      // Если файл существует, отправляем его
+      res.sendFile(coverPath);
+    } else {
+      // Если файла нет, возвращаем 404
+      res.status(404).json({ message: 'Файл обложки не найден' });
     }
   } catch (error) {
     console.error('Ошибка получения обложки:', error);
