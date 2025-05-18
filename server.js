@@ -37,6 +37,11 @@ app.use('/api/reviews', reviewsRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/admin', adminRoutes);
 
+// Обработка всех остальных маршрутов для SPA
+app.get('*', (req, res) => {
+  res.status(200).json({ message: 'API работает. Для фронтенда используйте соответствующий URL.' });
+});
+
 // Обработка ошибок
 app.use((err, req, res, next) => {
   console.error(err.stack);
