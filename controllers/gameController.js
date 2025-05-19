@@ -86,11 +86,14 @@ exports.updateGame = async (req, res) => {
     const gameId = req.params.id;
     const { title, developer, publisher, release_date, genres, platforms } = req.body;
     
-    let cover_image = null;
+    // Получаем текущие данные игры
+    const currentGame = await Game.getById(gameId);
+    let cover_image = currentGame.cover_image; // Сохраняем текущую обложку
     
     // Если загружена новая обложка
     if (req.file) {
       cover_image = `/uploads/${req.file.filename}`;
+      console.log('Новый файл загружен на сервер:', cover_image);
     }
 
     // Преобразуем строки в массивы, если они пришли в виде строк
