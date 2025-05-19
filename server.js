@@ -8,18 +8,32 @@ const app = express();
 
 // Настройка CORS
 const corsOptions = {
-  origin: '*', // Разрешаем запросы с любого источника
+  origin: ['http://localhost:3000', 'https://gc-frontend-6j2m.onrender.com', '*'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'user-id', 'username', 'Origin'],
+  credentials: true,
+  maxAge: 86400 // 24 часа (в секундах)
 };
 
 // Middleware
 app.use(cors(corsOptions));
+
+// Предварительная обработка OPTIONS запросов
+app.options('*', cors(corsOptions));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Путь для статических файлов (загруженные изображения)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Добавляем заголовки для каждого запроса
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, user-id, username');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  next();
+});
 
 // Корневой маршрут для проверки API
 app.get('/', (req, res) => {
