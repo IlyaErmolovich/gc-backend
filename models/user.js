@@ -86,6 +86,24 @@ class User {
     }
   }
 
+  // Получение пользователя по имени
+  static async getByUsername(username) {
+    try {
+      const [users] = await db.query(
+        'SELECT id, username, role_id, avatar FROM users WHERE username = ?',
+        [username]
+      );
+
+      if (users.length === 0) {
+        throw new Error('Пользователь не найден');
+      }
+
+      return users[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // Обновление профиля пользователя
   static async updateProfile(id, username, avatar) {
     try {
